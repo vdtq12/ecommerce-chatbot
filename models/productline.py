@@ -18,10 +18,10 @@ class Product_line(db.Model):
         nullable=False,
     )
     name = db.Column(db.String(30), nullable=False)
-    description = db.Column(db.Text, default="Đang cập nhật")
+    # description = db.Column(db.Text, default="Đang cập nhật")
 
     def __init__(self, category, supplier, name, description="Đang cập nhật"):
         self.category = category
         self.supplier = supplier
         self.name = name
-        self.description = description
+        # self.description = description

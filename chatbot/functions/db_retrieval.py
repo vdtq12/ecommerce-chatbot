@@ -42,7 +42,6 @@ def find_product(query: CustomerInput):
         category TEXT,
         supplier TEXT NOT NULL ,
         name VARCHAR(30) NOT NULL ,
-        description text DEFAULT 'Đang cập nhật',
         CONSTRAINT fk_product_category
             FOREIGN KEY (category) REFERENCES category(category_name)
                 ON DELETE set NULL
@@ -78,25 +77,33 @@ def find_product(query: CustomerInput):
 
 
     Table Sample Insert Data:
+    some keyword used with product category:
+    INSERT INTO public.category (category_name)
+        VALUES ('laptop'), ('pc - linh kiện máy tính'), ('phụ kiện'), ('thiết bị âm thanh'), ('sản phẩm apple');
+        
+    some keyword used with supplier: 
     INSERT INTO supplier (code)
         VALUES ('asus'), ('dell'), ('apple'), ('acer'), ('hp'), ('lenovo'), ('msi'), ('kingston'), ('intel'), ('seagate'), ('corsair'), ('adata'), ('sandisk'), ('xigmatek'), ('samsung'), ('gigabyte'), ('wd'), ('deepcool'), ('soundpeats'), ('jbl'), ('dareu'), ('havit'), ('lg'), ('bose'), ('xiaomi'), ('microtek'), ('baseus'),('logitech'), ('hyperx'), ('soundmax'), ('sdrd'), ('razer'), ('segotep'), ('nzxt');
     
-    INSERT INTO product_line (category, name, supplier, description) VALUES  ('laptop', 'lenovo ideapad', 'lenovo', 'this is the lenovo idealpad description'),
+    INSERT INTO product_line (category, name, supplier) VALUES  ('laptop', 'lenovo ideapad', 'lenovo');
 
-    INSERT INTO public.product (local_specs, quantity, price, is_standard, product_line, sku, images) VALUES  ('this is example specification list', 18, 15490000, false, 2, '22100234814 ', 'this is place holder for the real images list'),
+    INSERT INTO public.product (local_specs, quantity, price, is_standard, product_line, sku, images) VALUES  ('this is example specification list', 18, 15490000, false, 2, '22100234814 ', 'this is place holder for the real images list');
 
 
 
-    Query Instruction:
-    Not select attribute `images`, `sku` while in the SQL statements. You are encouraged to join the product_line and product tables together in the SQL query.
-    In case need to query N records of data, select limit upto 5.
+
+    Query Instruction (4 notes):
+    1. Not select attribute `images`, `sku` while in the SQL statements. You are encouraged to join the product_line and product tables together in the SQL query.
+    2. Check and change case sensitive of the user's query to match the given keywords (supplier and category, for example: LOGITECH change to logitech, Laptop change to laptop) have been provided to you.
+    3. In case need to query N records of data, select limit upto 5.
+    4. Priority to use ILIKE operator in the query statement rather than simply LIKE.
 
     
 
 
     Some basic example output:
-    SELECT * FROM product;
-    SELECT product.name, product.price, product_line.description FROM product INNER JOIN product_line ON product.product_line=product_line.product_id;
+    SELECT * FROM product LIMIT 5;
+    SELECT product.name, product.price, product_line.category, product.quantity FROM product INNER JOIN product_line ON product.product_line=product_line.product_id LIMIT 5;
 
     
 
@@ -109,7 +116,7 @@ def find_product(query: CustomerInput):
     res = qa_chain.invoke({"input": query})
     print(res.return_values['output'])
 
-    get_product_data(res.return_values['output'])
+    product_data = get_product_data(res.return_values['output'])
     # return ""
     # input = query
     # find_model = ChatOpenAI(
@@ -144,4 +151,6 @@ def find_product(query: CustomerInput):
     #     User question: {input}."""
     # )
 
-    return "can not find the result"
+    print(f"PRODUCT DATA FOUND: {product_data} - end.")
+
+    return product_data

@@ -68,8 +68,10 @@ agent_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             """You work as an assistant only for the BKTechStore website and your role is to respond to customer inquiries. 
-            If a question is not relevant to the BKTechStore website or if there are no matching tools available, you should inform the customer that you are unable to answer their question.
-            ONLY USE PROVIDED INFORMATION AND TOOLS TO ASNWER.
+            You will help the customer with their questions about the BKTechStore website which sells computer and related devices.
+            If a question is NOT RELEVANT to the BKTechStore website or if there are no matching tools available, you should inform the customer that you are unable to answer their question.
+            ONLY USE PROVIDED INFORMATION, MEMMORY INFORMATION AND TOOLS TO ASNWER.
+            DO NOT MAKE UP or GUESS any additional information.
             
             Here are something you can do if user ask:
             - Answer questions about the products available on the website.
@@ -119,15 +121,16 @@ tools = [answer_about_yourself, search_system_requirements, answer_about_bktechs
 
 class chatbot:
     def __init__(self, mem):
-        self.memory = ConversationSummaryBufferMemory(return_messages=True, memory_key="memory", llm=memory_llm)
-        # self.memory = ConversationSummaryMemory(return_messages=True, memory_key="memory", llm=memory_llm)
-        self.memory.moving_summary_buffer = mem
+        self.memory = ConversationSummaryMemory(return_messages=True, memory_key="memory", llm=memory_llm)
+        self.memory.buffer = mem
         self.agent_executor = AgentExecutor(agent=agent_chain, tools=tools, verbose=True, memory=self.memory)
     
     def chat_public(self, query):
+        try:
+            result = self.agent_executor.invoke({"input": query})
+            print("--- result: ", result)
+            print("--- result: ", self.memory.buffer)
+            return result["output"], self.memory.buffer
+        except Exception as e:
+            return "Error fetching question", ""
 
-        result = self.agent_executor.invoke({"input": query})
-        print("--- result: ", result)
-        print("--- result: ", self.memory.moving_summary_buffer)
-
-        return result["output"], self.memory.moving_summary_buffer
