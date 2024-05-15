@@ -4,7 +4,7 @@ from ..extensions import db
 class Product_line(db.Model):
     __tablename__ = "product_line"
 
-    product_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category = db.Column(
         db.Text,
         db.ForeignKey(

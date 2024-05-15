@@ -38,7 +38,7 @@ def find_product(query: CustomerInput):
 
     Table Information:
     CREATE TABLE IF NOT EXISTS product_line(
-        product_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+        id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
         category TEXT,
         supplier TEXT NOT NULL ,
         name VARCHAR(30) NOT NULL ,
@@ -53,7 +53,7 @@ def find_product(query: CustomerInput):
     );
     
     CREATE TABLE IF NOT EXISTS product(
-        product_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY  ,
+        id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY  ,
         name TEXT not null ,
         sku CHAR(10) UNIQUE ,
         images text[],
@@ -63,7 +63,7 @@ def find_product(query: CustomerInput):
         is_standard BOOLEAN DEFAULT FALSE,
         product_line SERIAL NOT NULL ,
         CONSTRAINT fk_productLine
-            FOREIGN KEY (product_line) REFERENCES product_line(product_id)
+            FOREIGN KEY (product_line) REFERENCES product_line(id)
                 ON DELETE CASCADE
                 ON UPDATE CASCADE
     );
@@ -77,14 +77,11 @@ def find_product(query: CustomerInput):
 
 
     Table Sample Insert Data:
-    some keyword used with product category:
-    INSERT INTO public.category (category_name)
-        VALUES ('laptop'), ('pc - linh kiện máy tính'), ('phụ kiện'), ('thiết bị âm thanh'), ('sản phẩm apple');
+    some keyword used with product category: category - ('laptop');
         
-    some keyword used with supplier: 
-    INSERT INTO supplier (code)
-        VALUES ('asus'), ('dell'), ('apple'), ('acer'), ('hp'), ('lenovo'), ('msi'), ('kingston'), ('intel'), ('seagate'), ('corsair'), ('adata'), ('sandisk'), ('xigmatek'), ('samsung'), ('gigabyte'), ('wd'), ('deepcool'), ('soundpeats'), ('jbl'), ('dareu'), ('havit'), ('lg'), ('bose'), ('xiaomi'), ('microtek'), ('baseus'),('logitech'), ('hyperx'), ('soundmax'), ('sdrd'), ('razer'), ('segotep'), ('nzxt');
+    some keyword used with supplier: supplier - ('asus'), ('dell'), ('apple'), ('acer'), ('hp'), ('lenovo'), ('msi'), ('kingston'), ('intel'), ('seagate'), ('corsair'), ('adata'), ('sandisk'), ('xigmatek'), ('samsung'), ('gigabyte'), ('wd'), ('deepcool'), ('soundpeats'), ('jbl'), ('dareu'), ('havit'), ('lg'), ('bose'), ('xiaomi'), ('microtek'), ('baseus'),('logitech'), ('hyperx'), ('soundmax'), ('sdrd'), ('razer'), ('segotep'), ('nzxt');
     
+    some example existed records:
     INSERT INTO product_line (category, name, supplier) VALUES  ('laptop', 'lenovo ideapad', 'lenovo');
 
     INSERT INTO public.product (local_specs, quantity, price, is_standard, product_line, sku, images) VALUES  ('this is example specification list', 18, 15490000, false, 2, '22100234814 ', 'this is place holder for the real images list');
@@ -92,18 +89,19 @@ def find_product(query: CustomerInput):
 
 
 
-    Query Instruction (4 notes):
+    Query Instruction (5 notes):
     1. Not select attribute `images`, `sku` while in the SQL statements. You are encouraged to join the product_line and product tables together in the SQL query.
-    2. Check and change case sensitive of the user's query to match the given keywords (supplier and category, for example: LOGITECH change to logitech, Laptop change to laptop) have been provided to you.
-    3. In case need to query N records of data, select limit upto 5.
-    4. Priority to use ILIKE operator in the query statement rather than simply LIKE.
+    2. Check and change case sensitive of the user's query to match the given keywords have been provided to you (supplier and category, for example: LOGITECH change to logitech, Laptop change to laptop).
+    3. Check and compare user's keyword to match the attribute keywords have been provided to you (supplier and category, for example: user keyword - hp laptop, supplier keyword - hp, category keyword - laptop).
+    4. In case need to query N records of data, select limit upto 5.
+    5. Priority to use ILIKE operator in the query statement rather than simply LIKE.
 
     
 
 
     Some basic example output:
     SELECT * FROM product LIMIT 5;
-    SELECT product.name, product.price, product_line.category, product.quantity FROM product INNER JOIN product_line ON product.product_line=product_line.product_id LIMIT 5;
+    SELECT product.name, product.price, product_line.category, product.quantity FROM product INNER JOIN product_line ON product.product_line=product_line.id LIMIT 5;
 
     
 
@@ -117,39 +115,6 @@ def find_product(query: CustomerInput):
     print(res.return_values['output'])
 
     product_data = get_product_data(res.return_values['output'])
-    # return ""
-    # input = query
-    # find_model = ChatOpenAI(
-    #     engine="gpt-35-turbo-16k", temperature=0  # engine = "deployment_name"
-    # )
-
-    # chain = create_sql_agent(
-    #     llm=find_model,
-    #     # toolkit=SQLDatabaseToolkit(db=db, llm=find_model),
-    #     verbose=True,
-    #     agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    #     input_variables=["input", "agent_scratchpad"],
-    #     handle_parsing_errors=True,
-    # )
-
-    # result = chain.run(
-    #     """You are an agent designed to interact with a SQL database.
-    #     Please answer the user question base on following instruction:
-
-    #     Instruction:
-    #     The `product_line` table has 5 columns: `category`, `name`, `supplier`, `description`, `product_id`.
-    #     The `product_line` table represents the information with each record contains information of a product.
-    #     The `product` table has 7 columns: `local_specs`, `quantity`, `price`, `is_standard`, `sku`, `images`, `product_line`.
-    #     The `product` table represents the information with each record contains specification information of a product.
-    #     The `product_line` of the `product` table is REFERENCES to `product_id` of `product_line` table.
-
-    #     Join the `product` table and `product_line` table and just take these attributes / column: `category`, `name`, `supplier`, `local_specs`, `price`,`quantity`.
-    #     (join by `product_line` of `product` table and `product_id` of `product_line` table).
-    #     In case need to query N records of data, select limit upto 5.
-    #     From the join result and user question, generate suitable query to answer user question.
-
-    #     User question: {input}."""
-    # )
 
     print(f"PRODUCT DATA FOUND: {product_data} - end.")
 

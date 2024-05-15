@@ -54,3 +54,6 @@ ENV/
 env.bak/
 venv.bak/
 
+#Test files
+test.py
+

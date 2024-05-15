@@ -12,5 +12,5 @@
 #     products=ProductLine.query.limit(5).all()
     
 #     for product in products:
-#         print(product.product_id, product.category, product.supplier, product.name, product.description)
+#         print(product.id, product.category, product.supplier, product.name, product.description)
 #     return 'hi'

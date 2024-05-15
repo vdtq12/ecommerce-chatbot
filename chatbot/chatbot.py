@@ -132,5 +132,6 @@ class chatbot:
             print("--- result: ", self.memory.buffer)
             return result["output"], self.memory.buffer
         except Exception as e:
+            print(f"error: {str(e)}")
             return "Error fetching question", ""
 

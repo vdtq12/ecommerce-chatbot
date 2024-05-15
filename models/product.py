@@ -2,7 +2,7 @@ from ..extensions import db
 
 
 class Product(db.Model):
-    product_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
     sku = db.Column(db.String(10), unique=True)
     images = db.Column(db.ARRAY(db.String))
@@ -13,7 +13,7 @@ class Product(db.Model):
     product_line = db.Column(
         db.Integer,
         db.ForeignKey(
-            "product_line.product_id", ondelete="CASCADE", onupdate="CASCADE"
+            "product_line.id", ondelete="CASCADE", onupdate="CASCADE"
         ),
         nullable=False,
     )
