@@ -25,10 +25,10 @@ def answer_about_bktechstore(query: CustomerInput):
 
     result = retriever.get_relevant_documents(query)
 
-    policies_info = [x.page_content for x in result]
+    info = "\n".join(item.page_content for item in result)
 
     print("\n--- result: ", result)
-    print("\n--- policy info: ", policies_info)
+    print("\n--- policy info: ", info)
 
     policy_model = ChatOpenAI(engine="gpt-35-turbo-16k")
     policy_prompt = PromptTemplate.from_template(
@@ -45,5 +45,5 @@ def answer_about_bktechstore(query: CustomerInput):
     )
 
     policy_chain = policy_prompt | policy_model | OpenAIFunctionsAgentOutputParser()
-    res = policy_chain.invoke({"input": query, "information": policies_info})
+    res = policy_chain.invoke({"input": query, "information": info})
     return res

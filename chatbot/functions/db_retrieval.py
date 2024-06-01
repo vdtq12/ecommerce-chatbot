@@ -11,7 +11,7 @@ from langchain.agents.output_parsers.openai_functions import (
     OpenAIFunctionsAgentOutputParser,
 )
 
-from ...db_funcs.product_data import get_product_data
+from ...db_funcs.bot_sql_executor_controller import get_product_data
 
 
 load_dotenv()
@@ -40,14 +40,14 @@ def find_product(query: CustomerInput):
     CREATE TABLE IF NOT EXISTS product_line(
         id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
         category TEXT,
-        supplier TEXT NOT NULL ,
+        vendor TEXT NOT NULL ,
         name VARCHAR(30) NOT NULL ,
         CONSTRAINT fk_product_category
             FOREIGN KEY (category) REFERENCES category(category_name)
                 ON DELETE set NULL
                 ON UPDATE CASCADE,
-        CONSTRAINT fk_product_supplier
-            FOREIGN KEY (supplier) REFERENCES supplier(code)
+        CONSTRAINT fk_product_vendor
+            FOREIGN KEY (vendor) REFERENCES vendor(code)
                 ON DELETE CASCADE
                 ON UPDATE CASCADE
     );
@@ -56,11 +56,9 @@ def find_product(query: CustomerInput):
         id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY  ,
         name TEXT not null ,
         sku CHAR(10) UNIQUE ,
-        images text[],
         local_specs JSONB,
         quantity QUANTITY DEFAULT 1,
-        price PRICE,
-        is_standard BOOLEAN DEFAULT FALSE,
+        list_price PRICE,
         product_line SERIAL NOT NULL ,
         CONSTRAINT fk_productLine
             FOREIGN KEY (product_line) REFERENCES product_line(id)
@@ -68,8 +66,8 @@ def find_product(query: CustomerInput):
                 ON UPDATE CASCADE
     );
 
-    CREATE TABLE IF NOT EXISTS supplier(
-        code TEXT PRIMARY KEY ,
+    CREATE TABLE IF NOT EXISTS vendor(
+        id TEXT PRIMARY KEY ,
         name TEXT UNIQUE
     );
 
@@ -77,33 +75,21 @@ def find_product(query: CustomerInput):
 
 
     Table Sample Insert Data:
-    some keyword used with product category: category - ('laptop');
-        
-    some keyword used with supplier: supplier - ('asus'), ('dell'), ('apple'), ('acer'), ('hp'), ('lenovo'), ('msi'), ('kingston'), ('intel'), ('seagate'), ('corsair'), ('adata'), ('sandisk'), ('xigmatek'), ('samsung'), ('gigabyte'), ('wd'), ('deepcool'), ('soundpeats'), ('jbl'), ('dareu'), ('havit'), ('lg'), ('bose'), ('xiaomi'), ('microtek'), ('baseus'),('logitech'), ('hyperx'), ('soundmax'), ('sdrd'), ('razer'), ('segotep'), ('nzxt');
+    some keyword can be used with query product category are: laptop, apple, audio, accessories, games, streams;
+    some keyword can be used with query product vendor are: asus, acer, apple, hp, samsung, sony, STEELSERIES, intel, seagate, corsair, samsung, jbl, xiaomi, logitech;
     
-    some example existed records:
-    INSERT INTO product_line (category, name, supplier) VALUES  ('laptop', 'lenovo ideapad', 'lenovo');
-
-    INSERT INTO public.product (local_specs, quantity, price, is_standard, product_line, sku, images) VALUES  ('this is example specification list', 18, 15490000, false, 2, '22100234814 ', 'this is place holder for the real images list');
-
-
-
-
     Query Instruction (5 notes):
     1. Not select attribute `images`, `sku` while in the SQL statements. You are encouraged to join the product_line and product tables together in the SQL query.
-    2. Check and change case sensitive of the user's query to match the given keywords have been provided to you (supplier and category, for example: LOGITECH change to logitech, Laptop change to laptop).
-    3. Check and compare user's keyword to match the attribute keywords have been provided to you (supplier and category, for example: user keyword - hp laptop, supplier keyword - hp, category keyword - laptop).
-    4. In case need to query N records of data, select limit upto 5.
-    5. Priority to use ILIKE operator in the query statement rather than simply LIKE.
+    2. Check and change case sensitive of the user's query to match the given keywords have been provided to you (vendor and category, for example: LOGITECH change to logitech, Laptop change to laptop).
+    3. Check and compare user's keyword to match the attribute keywords have been provided to you (vendor and category, for example: user keyword - hp laptop, vendor keyword - hp, category keyword - laptop).
+    4. If you are given the full name of product such as "laptop lenovo ideapad", "laptop hp omen", please do the query by product name and MUST include the local_specs column in the select list.
+    5. In case need to query N records of data, select limit upto 5.
+    6. Priority to use ILIKE operator in ALL the query statement rather than simply LIKE.
 
     
-
-
     Some basic example output:
-    SELECT * FROM product LIMIT 5;
-    SELECT product.name, product.price, product_line.category, product.quantity FROM product INNER JOIN product_line ON product.product_line=product_line.id LIMIT 5;
-
-    
+    keyword use: SELECT product.name, product.list_price , product_line.category, product.quantity FROM product INNER JOIN product_line ON product.product_line=product_line.id WHERE product_line.category ILIKE '%%laptop%%' LIMIT 5;
+    product name use: SELECT product.local_specs, product.name, product.list_price , product.quantity FROM product where product.name ILIKE '%%laptop lenovo ideapad%%';
 
 
     Please note that you should not make up or guess any additional information or additional newline when generating the SQL query.

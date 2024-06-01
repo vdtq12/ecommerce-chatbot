@@ -12,16 +12,16 @@ class Product_line(db.Model):
         ),
         nullable=True,
     )
-    supplier = db.Column(
+    vendor = db.Column(
         db.Text,
-        db.ForeignKey("supplier.code", ondelete="CASCADE", onupdate="CASCADE"),
+        db.ForeignKey("vendor.code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
     name = db.Column(db.String(30), nullable=False)
     # description = db.Column(db.Text, default="Đang cập nhật")
 
-    def __init__(self, category, supplier, name, description="Đang cập nhật"):
+    def __init__(self, category, vendor, name, description="Đang cập nhật"):
         self.category = category
-        self.supplier = supplier
+        self.vendor = vendor
         self.name = name
         # self.description = description

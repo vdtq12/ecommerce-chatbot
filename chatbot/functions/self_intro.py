@@ -10,7 +10,7 @@ from ..pydanticBaseModel.pydanticBaseModel import CustomerInput
 
 @tool(args_schema=CustomerInput)
 def answer_about_yourself(query: CustomerInput):
-    """Answer customer question about introduce yourself or greetings as hi/hello/..."""
+    """Answer customer question about introduce yourself or greetings as hi, hello, etc"""
 
     qa_model = ChatOpenAI(engine="gpt-35-turbo-16k")
     qa_prompt = PromptTemplate.from_template(

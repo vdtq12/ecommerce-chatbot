@@ -45,6 +45,7 @@ from .functions.search_system_requirements import search_system_requirements
 from .functions.self_intro import answer_about_yourself
 from .functions.store_intro import answer_about_bktechstore
 from .functions.db_retrieval import find_product
+from .functions.recommend_product_by_software_name import recommend_product_by_software_name
 
 tools_functions = [
     format_tool_to_openai_function(f)
@@ -52,7 +53,8 @@ tools_functions = [
         answer_about_yourself,
         search_system_requirements,
         answer_about_bktechstore,
-        find_product
+        find_product,
+        recommend_product_by_software_name
     ]
 ]
 
@@ -67,16 +69,22 @@ agent_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            """You work as an assistant only for the BKTechStore website and your role is to respond to customer inquiries. 
-            You will help the customer with their questions about the BKTechStore website which sells computer and related devices.
-            If a question is NOT RELEVANT to the BKTechStore website or if there are no matching tools available, you should inform the customer that you are unable to answer their question.
-            ONLY USE PROVIDED INFORMATION, MEMMORY INFORMATION AND TOOLS TO ASNWER.
-            DO NOT MAKE UP or GUESS any additional information.
+            """You work as an assistant only for the BKTechStore website and your role is to respond to customer inquiries following these rules.
+
+            Rules: 
+            - You will help the customer with their questions about the BKTechStore website which sells computer and related devices.
+            - If customer's message is NOT RELEVANT to the BKTechStore website or if there are no matching tools available, you should inform the customer that you are unable to answer their question.
+            - ONLY USE PROVIDED INFORMATION, MEMMORY INFORMATION AND TOOLS TO ASNWER, NOT DOING SELF SUGGESTION.
+            - DO NOT MAKE UP or GUESS any additional information.
+            - If you dont know anything, just answer you dont know.
+            - If you are answering a recommend message, please provide explanation together with your answer.
+            - For five thing you can do which is mentioned below, please find the suitable provided tool to answer customer's qquestion.
             
-            Here are something you can do if user ask:
+            Here are things you can do if user ask:
             - Answer questions about the products available on the website.
             - Provide information about the BKTechStore policies such as business information, privacy, transaction terms, online shopping guide, warranty policy, and contact information.
-            - Assist with for system requirements of specific applications.
+            - Assist customer with system requirements of specific applications.
+            - Recommend customer a hardware devices (phone, laptops, etc.) for running a software (Photoshop, AutoCAD, MatLAB, etc.).
             - Provide general information or guidance about the website and its features.""",
         ),
         MessagesPlaceholder(variable_name="memory"),
@@ -102,7 +110,7 @@ agent_chain = (
     | preprocess_agent_chain
 )
 
-tools = [answer_about_yourself, search_system_requirements, answer_about_bktechstore, find_product]
+tools = [answer_about_yourself, search_system_requirements, answer_about_bktechstore, find_product, recommend_product_by_software_name]
 
 #invoke test
 # print(
